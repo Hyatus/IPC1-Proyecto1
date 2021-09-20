@@ -36,7 +36,6 @@ public class PanelSucursales extends JPanel {
     private void iniciarComponentes() {
         agregarPanel();
         agregarBotones();
-        agregarGrafica();
     }
 
     public void agregarPanel(){
@@ -90,12 +89,6 @@ public class PanelSucursales extends JPanel {
 
     }
 
-    public void agregarGrafica(){
-        graficaSucursal = new JLabel();
-        graficaSucursal.setBounds(450,274,281,253);
-        graficaSucursal.setOpaque(true);
-        graficaSucursal.setBackground(Color.YELLOW);
-        this.add(graficaSucursal);
-    }
+
 
 }

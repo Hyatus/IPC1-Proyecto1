@@ -4,14 +4,16 @@ import Clases.Clientes;
 import Clases.Productos;
 import Clases.Sucursales;
 import Clases.Vendedores;
+import PlantillaPDF.PlantillaProductos;
+import PlantillaPDF.PlantillaSucursales;
 import com.google.gson.*;
-
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Date;
 
 public class VentanaAdmin extends JFrame implements ActionListener {
 
@@ -40,10 +42,19 @@ public class VentanaAdmin extends JFrame implements ActionListener {
     JTextField cajaCodigoD,cajaNombreD,cajaDireccionD, cajaCorreoD, cajaTelefonoD;
     JButton botonAgregarS, botonActualizarS;
 
+    /******************************************************************************************************
+     * COMPONENTES DEL JDIALOG PARA CREAR NUEVO PRODUCTO Y ACTUALIZAR                                     *
+     ******************************************************************************************************/
+    public JDialog crearNuevoProducto;
+    public JLabel encabezadoProdD,codigoProdD,NombreProdD,DescripcionProd,CantidadProd,PrecioProd;
+    public JTextField cajaCodigoProdD,cajaNombreProdD,cajaDescripcionD, cajaCantidadD, cajaPrecioD;
+    public JButton botonAgregarP,botonActualizarP;
+
 
     public VentanaAdmin(){
         try{
-            File archivo = new File("sucursales.bin");
+            File archivoSucursales = new File("sucursales.bin");
+            File archivoProductos = new File("productos.bin");
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -55,7 +66,6 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         agregarListeners();
         iniciarComponentes();
     }
-
     private void iniciarComponentes() {
         botonCerrarSesión = new JButton();
         botonCerrarSesión.setBounds(630,10,136,40);
@@ -64,9 +74,100 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         this.add(botonCerrarSesión);
         botonCerrarSesión.addActionListener(this);
         cargarDatosSucursal();
-        System.out.println(contadorActualSucursal);
+        cargarDatosProductos();
+        System.out.println("Sucursales al inicio " + contadorActualSucursal);
+        System.out.println("Productos al inicio " + contadorActualproductos);
         colocarTabbedPanel();
     }
+
+    private void colocarTabbedPanel() {
+        grupoPaneles = new JTabbedPane();
+        grupoPaneles.setBounds(15,77,745,587);
+        grupoPaneles.add("Sucursales",panelsucursal);
+        grupoPaneles.add("Productos",panelProductos);
+        grupoPaneles.add("Clientes",panelClientes);
+        grupoPaneles.add("Vendedores",panelVendedores);
+        this.add(grupoPaneles);
+    }
+
+    private void agregarListeners(){
+        panelsucursal.crearSurcursal.addActionListener(this);
+        panelsucursal.actualizarSucursal.addActionListener(this);
+        panelsucursal.eliminarSucursal.addActionListener(this);
+        panelsucursal.cargaMasivaSucursal.addActionListener(this);
+        panelsucursal.exportarSucursal.addActionListener(this);
+
+        panelProductos.crearProducto.addActionListener(this);
+        panelProductos.actualizarProducto.addActionListener(this);
+        panelProductos.eliminarProducto.addActionListener(this);
+        panelProductos.cargaProducto.addActionListener(this);
+        panelProductos.exportarProductos.addActionListener(this);
+
+        panelClientes.crearCliente.addActionListener(this);
+        panelClientes.actualizarCliente.addActionListener(this);
+
+        panelVendedores.crearVendedor.addActionListener(this);
+        panelVendedores.actualizarVendedor.addActionListener(this);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == panelsucursal.crearSurcursal){
+            ventanaCrearNuevaSucursal();
+        }else if(e.getSource() == botonAgregarS){
+            funcionbotonAgregarSucursal();
+        }else if(e.getSource() == panelsucursal.actualizarSucursal){
+            cargarDatosVentanaActualizar();
+        }else if(e.getSource() == botonActualizarS){
+            funcionbotonActualizarSucursal();
+        }else if(e.getSource() == panelsucursal.eliminarSucursal){
+            eliminarSucursal();
+        }else if(e.getSource() == panelsucursal.cargaMasivaSucursal){
+              cargaMasivaSucursal();
+        }else if(e.getSource() == panelsucursal.exportarSucursal){
+              crearReporteSucursales();
+        }
+        else if(e.getSource() == panelProductos.crearProducto){
+              ventanaCrearNuevoProducto();
+        }else if(e.getSource() == botonAgregarP){
+              funcionbotonAgregarProducto();
+        }else if(e.getSource() == panelProductos.actualizarProducto){
+              cargarDatosVentanaActualizarProducto();
+        }else if(e.getSource() == botonActualizarP){
+              funcionbotonActualizarProducto();
+        }else if(e.getSource() == panelProductos.eliminarProducto){
+              eliminarProducto();
+        }else if(e.getSource() == panelProductos.cargaProducto){
+              cargaMasivaProductos();
+        }else if(e.getSource() == panelProductos.exportarProductos){
+            crearReporteProductos();
+        }
+        else if(e.getSource() == panelClientes.crearCliente){
+            panelClientes.ventanaCrearNuevoCliente();
+        }else if(e.getSource() == panelClientes.actualizarCliente){
+            panelClientes.ventanaActualizarCliente();
+        }
+        else if(e.getSource() == panelVendedores.crearVendedor){
+            panelVendedores.ventanaCrearNuevoVendedor();
+        }else if(e.getSource() == panelVendedores.actualizarVendedor){
+            panelVendedores.ventanaActualizarVendedor();
+        }
+        else if(e.getSource() == botonCerrarSesión){
+            ordenarSucursal();
+            escribirDatos(sucursales);
+            ordenarProductos();
+            escribirDatos(productos);
+            JOptionPane.showMessageDialog(null,"Sesión Terminada", "Cerrar Sesión",JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+            //VentanaLogin ventanaLogin = new VentanaLogin(vendedores);
+            //ventanaLogin.setVisible(true);
+        }
+
+    }
+
+    /****************************************************************************************************************
+     * INVOCAR VENTANA PARA CREAR Y ACTUALIZAR NUEVA SUCURSAL Y FUNCIONES: ACTUALIZAR, ELIMINAR, CARGA MASIVA Y PDF *
+     ****************************************************************************************************************/
 
     public Object leerDatosSucursal(){
         try{
@@ -97,80 +198,6 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         }
     }
 
-
-    private void colocarTabbedPanel() {
-        grupoPaneles = new JTabbedPane();
-        grupoPaneles.setBounds(15,77,745,587);
-        grupoPaneles.add("Sucursales",panelsucursal);
-        grupoPaneles.add("Productos",panelProductos);
-        grupoPaneles.add("Clientes",panelClientes);
-        grupoPaneles.add("Vendedores",panelVendedores);
-        this.add(grupoPaneles);
-    }
-
-    private void agregarListeners(){
-        panelsucursal.crearSurcursal.addActionListener(this);
-        panelsucursal.actualizarSucursal.addActionListener(this);
-        panelsucursal.eliminarSucursal.addActionListener(this);
-        panelsucursal.cargaMasivaSucursal.addActionListener(this);
-        panelsucursal.exportarSucursal.addActionListener(this);
-
-        panelProductos.crearProducto.addActionListener(this);
-        panelProductos.actualizarProducto.addActionListener(this);
-
-        panelClientes.crearCliente.addActionListener(this);
-        panelClientes.actualizarCliente.addActionListener(this);
-
-        panelVendedores.crearVendedor.addActionListener(this);
-        panelVendedores.actualizarVendedor.addActionListener(this);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == panelsucursal.crearSurcursal){
-            ventanaCrearNuevaSucursal();
-        }else if(e.getSource() == botonAgregarS){
-            funcionbotonAgregarSucursal();
-        }else if(e.getSource() == panelsucursal.actualizarSucursal){
-            cargarDatosVentanaActualizar();
-        }else if(e.getSource() == botonActualizarS){
-            funcionbotonActualizarSucursal();
-        }else if(e.getSource() == panelsucursal.eliminarSucursal){
-            eliminarSucursal();
-        }else if(e.getSource() == panelsucursal.cargaMasivaSucursal){
-              cargaMasivaSucursal();
-        }else if(e.getSource() == panelsucursal.exportarSucursal){
-
-        }
-        else if(e.getSource() == panelProductos.crearProducto){
-            panelProductos.ventanaCrearNuevoProducto();
-        }else if(e.getSource() == panelProductos.actualizarProducto){
-            panelProductos.ventanaActualizarProducto();
-        }
-        else if(e.getSource() == panelClientes.crearCliente){
-            panelClientes.ventanaCrearNuevoCliente();
-        }else if(e.getSource() == panelClientes.actualizarCliente){
-            panelClientes.ventanaActualizarCliente();
-        }
-        else if(e.getSource() == panelVendedores.crearVendedor){
-            panelVendedores.ventanaCrearNuevoVendedor();
-        }else if(e.getSource() == panelVendedores.actualizarVendedor){
-            panelVendedores.ventanaActualizarVendedor();
-        }
-        else if(e.getSource() == botonCerrarSesión){
-            ordenarSucursal();
-            escribirDatos(sucursales);
-            JOptionPane.showMessageDialog(null,"Sesión Terminada", "Cerrar Sesión",JOptionPane.INFORMATION_MESSAGE);
-            dispose();
-            //VentanaLogin ventanaLogin = new VentanaLogin(vendedores);
-            //ventanaLogin.setVisible(true);
-        }
-
-    }
-
-    /******************************************************************************************************
-     * INVOCAR VENTANA PARA CREAR Y ACTUALIZAR NUEVA SUCURSAL Y FUNCIONES: ACTUALIZAR, ELIMINAR, CARGA MASIVA Y PDF            *
-     ******************************************************************************************************/
     public void ventanaCrearNuevaSucursal(){
         crearNuevaSucursal = new JDialog();
         crearNuevaSucursal.setLayout(null);
@@ -411,6 +438,16 @@ public class VentanaAdmin extends JFrame implements ActionListener {
                     }
                 }
             }
+        }else if(object.equals(productos)){
+            for(int i = 0; i < productos.length; i++){
+                if(productos[i] != null){
+                    if(productos[i].getCodigoProducto() == codigo &&
+                            productos[i].getNombreProducto().equals(nombre)){
+                        indice = i;
+                        return indice;
+                    }
+                }
+            }
         }
         return -1;
     }
@@ -447,7 +484,7 @@ public class VentanaAdmin extends JFrame implements ActionListener {
                 long codigo = objeto.get("codigo").getAsLong();
                 String nombre = objeto.get("nombre").getAsString();
                 String direccion = objeto.get("direccion").getAsString();
-                String correo = objeto.get("coreo").getAsString();
+                String correo = objeto.get("correo").getAsString();
                 long telefono = objeto.get("telefono").getAsLong();
                 if(!buscarCodigoSucursal(sucursales,codigo)){
                     if(contadorActualSucursal < 50){
@@ -525,6 +562,354 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         return false;
     }
 
+    public void crearReporteSucursales(){
+        PlantillaSucursales plantilla = new PlantillaSucursales(new Date().toString(),"blue_logo.jpeg",this.sucursales);
+        plantilla.crearPlantilla();
+        try{
+            File path = new File("Reporte_Sucursales.pdf");
+            Desktop.getDesktop().open(path);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /****************************************************************************************************************
+     * INVOCAR VENTANA PARA CREAR Y ACTUALIZAR PRODUCTOS Y FUNCIONES: ACTUALIZAR, ELIMINAR, CARGA MASIVA Y PDF *
+     ****************************************************************************************************************/
+    public Object leerDatosProductos(){
+        try{
+            FileInputStream lectura = new FileInputStream("productos.bin");
+            ObjectInputStream leerdatos = new ObjectInputStream(lectura);
+            Object data  = leerdatos.readObject();
+            leerdatos.close();
+            return data;
+        } catch (IOException e) {
+            System.out.println("error " + e);
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error " + e);
+        }
+        return null;
+    }
+    private void cargarDatosProductos(){
+        if(!(leerDatosProductos() == null)){
+            productos = ((Productos[]) leerDatosProductos());
+            for(int i = 0; i < productos.length ; i++){
+                if(productos[i] != null){
+                    String[] fila = {String.valueOf(productos[i].getCodigoProducto()),
+                            productos[i].getNombreProducto(),productos[i].getDescripcionProducto(),String.valueOf(productos[i].getCantidadProducto()),
+                            String.valueOf(productos[i].getPrecioProducto())};
+                    panelProductos.modeloTabla.addRow(fila);
+                    contadorActualproductos++;
+                }
+            }
+        }
+    }
+
+    public void ventanaCrearNuevoProducto(){
+        crearNuevoProducto = new JDialog();
+        crearNuevoProducto.setLayout(null);
+        crearNuevoProducto.setResizable(false);
+        encabezadoProdD = new JLabel("Crear Nuevo Producto");
+        encabezadoProdD.setBounds(164,47,190,30);
+        encabezadoProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        codigoProdD = new JLabel("Código");
+        codigoProdD.setBounds(92,104,66,26);
+        codigoProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaCodigoProdD = new JTextField();
+        cajaCodigoProdD.setBounds(197,104,218,26);
+        cajaCodigoProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        NombreProdD = new JLabel("Nombre");
+        NombreProdD.setBounds(92,156,75,26);
+        NombreProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaNombreProdD = new JTextField();
+        cajaNombreProdD.setBounds(197,156,218,26);
+        cajaNombreProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        DescripcionProd = new JLabel("Descripción");
+        DescripcionProd.setBounds(88,209,95,26);
+        DescripcionProd.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaDescripcionD = new JTextField();
+        cajaDescripcionD.setBounds(197,209,218,26);
+        cajaDescripcionD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        CantidadProd = new JLabel("Cantidad");
+        CantidadProd.setBounds(92,262,75,26);
+        CantidadProd.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaCantidadD = new JTextField();
+        cajaCantidadD.setBounds(197,262,218,26);
+        cajaCantidadD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        PrecioProd = new JLabel("Precio");
+        PrecioProd.setBounds(92,315,75,26);
+        PrecioProd.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaPrecioD = new JTextField();
+        cajaPrecioD.setBounds(197,315,218,26);
+        cajaPrecioD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        botonAgregarP = new JButton("Agregar");
+        botonAgregarP.setBounds(185,361,154,32);
+        botonAgregarP.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        botonAgregarP.addActionListener(this);
+
+        crearNuevoProducto.add(encabezadoProdD);
+        crearNuevoProducto.add(codigoProdD);
+        crearNuevoProducto.add(cajaCodigoProdD);
+        crearNuevoProducto.add(NombreProdD);
+        crearNuevoProducto.add(cajaNombreProdD);
+        crearNuevoProducto.add(DescripcionProd);
+        crearNuevoProducto.add(cajaDescripcionD);
+        crearNuevoProducto.add(CantidadProd);
+        crearNuevoProducto.add(cajaCantidadD);
+        crearNuevoProducto.add(PrecioProd);
+        crearNuevoProducto.add(cajaPrecioD);
+        crearNuevoProducto.add(botonAgregarP);
+
+        crearNuevoProducto.setSize(510,479);
+        crearNuevoProducto.setLocationRelativeTo(null);
+        crearNuevoProducto.setVisible(true);
+
+    }
+    public void funcionbotonAgregarProducto(){
+        long codigoProducto;
+        String nombreProducto;
+        String descripcionProducto;
+        long cantidadProducto;
+        double precioProducto;
+
+        codigoProducto = Long.parseLong(cajaCodigoProdD.getText().trim());
+        nombreProducto = cajaNombreProdD.getText().trim();
+        descripcionProducto = cajaDescripcionD.getText().trim();
+        cantidadProducto = Long.parseLong(cajaCantidadD.getText().trim());
+        precioProducto = Double.parseDouble(cajaPrecioD.getText().trim());
+
+        if(contadorActualproductos < 200){
+            String[] fila = {cajaCodigoProdD.getText(),cajaNombreProdD.getText(),cajaDescripcionD.getText(),
+                    cajaCantidadD.getText().trim(),cajaPrecioD.getText().trim()};
+            panelProductos.modeloTabla.addRow(fila);
+            productos[contadorActualproductos] = new Productos(codigoProducto,nombreProducto,descripcionProducto,
+                    cantidadProducto,precioProducto);
+            contadorActualproductos++;
+            cajaCodigoProdD.setText("");
+            cajaNombreProdD.setText("");
+            cajaDescripcionD.setText("");
+            cajaCantidadD.setText("");
+            cajaPrecioD.setText("");
+        }else{
+            System.out.println("Ya no se pueden agregar más productos ");
+        }
+    }
+
+    public void ventanaActualizarProducto(){
+        crearNuevoProducto = new JDialog();
+        crearNuevoProducto.setLayout(null);
+        crearNuevoProducto.setResizable(false);
+        encabezadoProdD = new JLabel("Actualizar Producto");
+        encabezadoProdD.setBounds(164,47,190,30);
+        encabezadoProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        codigoProdD = new JLabel("Código");
+        codigoProdD.setBounds(92,104,66,26);
+        codigoProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaCodigoProdD = new JTextField();
+        cajaCodigoProdD.setBounds(197,104,218,26);
+        cajaCodigoProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        NombreProdD = new JLabel("Nombre");
+        NombreProdD.setBounds(92,156,75,26);
+        NombreProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaNombreProdD = new JTextField();
+        cajaNombreProdD.setBounds(197,156,218,26);
+        cajaNombreProdD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        DescripcionProd = new JLabel("Descripción");
+        DescripcionProd.setBounds(88,209,95,26);
+        DescripcionProd.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaDescripcionD = new JTextField();
+        cajaDescripcionD.setBounds(197,209,218,26);
+        cajaDescripcionD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        CantidadProd = new JLabel("Cantidad");
+        CantidadProd.setBounds(92,262,75,26);
+        CantidadProd.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaCantidadD = new JTextField();
+        cajaCantidadD.setBounds(197,262,218,26);
+        cajaCantidadD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        PrecioProd = new JLabel("Precio");
+        PrecioProd.setBounds(92,315,75,26);
+        PrecioProd.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        cajaPrecioD = new JTextField();
+        cajaPrecioD.setBounds(197,315,218,26);
+        cajaPrecioD.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        botonActualizarP = new JButton("Actualizar");
+        botonActualizarP.setBounds(185,361,154,32);
+        botonActualizarP.setFont(new Font("Dialog",Font.PLAIN,18));
+
+        botonActualizarP.addActionListener(this);
+
+        crearNuevoProducto.add(encabezadoProdD);
+        crearNuevoProducto.add(codigoProdD);
+        crearNuevoProducto.add(cajaCodigoProdD);
+        crearNuevoProducto.add(NombreProdD);
+        crearNuevoProducto.add(cajaNombreProdD);
+        crearNuevoProducto.add(DescripcionProd);
+        crearNuevoProducto.add(cajaDescripcionD);
+        crearNuevoProducto.add(CantidadProd);
+        crearNuevoProducto.add(cajaCantidadD);
+        crearNuevoProducto.add(PrecioProd);
+        crearNuevoProducto.add(cajaPrecioD);
+        crearNuevoProducto.add(botonActualizarP);
+
+        crearNuevoProducto.setSize(510,479);
+        crearNuevoProducto.setLocationRelativeTo(null);
+        crearNuevoProducto.setVisible(true);
+
+    }
+    public void cargarDatosVentanaActualizarProducto(){
+        if(!panelProductos.tablaProductos.getSelectionModel().isSelectionEmpty()){
+            ventanaActualizarProducto();
+            int filaSeleccionada = panelProductos.tablaProductos.getSelectedRow();
+            String codigo = (String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,0);
+            String nombre = (String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,1);
+            String descripcion = (String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,2);
+            String cantidad = (String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,3);
+            String precio = (String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,4);
+            cajaCodigoProdD.setText(codigo);
+            cajaNombreProdD.setText(nombre);
+            cajaDescripcionD.setText(descripcion);
+            cajaCantidadD.setText(cantidad);
+            cajaPrecioD.setText(precio);
+        }else{
+            System.out.println("No hay nada seleccionado");
+        }
+    }
+    public void funcionbotonActualizarProducto(){
+        int filaSeleccionada = panelProductos.tablaProductos.getSelectedRow();
+        //TOMAMOS LOS PRIMEROS DOS VALORES DE LA TABLA PARA BUSCARLOS DENTRO DEL ARREGLO
+        Long codigoBusqueda = Long.parseLong(((String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,0)).trim());
+        String nombreBusqueda = ((String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,1)).trim();
+        int indiceProducto = buscarEnArreglo(productos,codigoBusqueda,nombreBusqueda);
+        String codigo = cajaCodigoProdD.getText();
+        String nombre = cajaNombreProdD.getText();
+        String descripcion = cajaDescripcionD.getText();
+        String cantidad = cajaCantidadD.getText();
+        String precio = cajaPrecioD.getText();
+        panelProductos.modeloTabla.setValueAt(codigo,filaSeleccionada,0);
+        panelProductos.modeloTabla.setValueAt(nombre,filaSeleccionada,1);
+        panelProductos.modeloTabla.setValueAt(descripcion,filaSeleccionada,2);
+        panelProductos.modeloTabla.setValueAt(cantidad,filaSeleccionada,3);
+        panelProductos.modeloTabla.setValueAt(precio,filaSeleccionada,4);
+        //SI EL PRODUCTO NO SE ENCUENTRA EN EL ARREGLO NO SE MODIFICA
+        if(indiceProducto != -1){
+            productos[indiceProducto].setCodigoProducto(Long.parseLong(codigo.trim()));
+            productos[indiceProducto].setNombreProducto(nombre);
+            productos[indiceProducto].setDescripcionProducto(descripcion);
+            productos[indiceProducto].setCantidadProducto(Long.parseLong(cantidad.trim()));
+            productos[indiceProducto].setPrecioProducto(Double.parseDouble(precio.trim()));
+        }
+        //AL TERMINAR DE ACTUALIZAR CERRAMOS LA VENTANA DE DIALOGO
+        crearNuevoProducto.dispose();
+    }
+
+    public void eliminarProducto(){
+        if(!panelProductos.tablaProductos.getSelectionModel().isSelectionEmpty()){
+            int filaSeleccionada = panelProductos.tablaProductos.getSelectedRow();
+            long codigo = Long.parseLong(((String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,0)).trim());
+            String nombre = ((String)panelProductos.modeloTabla.getValueAt(filaSeleccionada,1)).trim();
+            int indiceBusquedaProducto = buscarEnArreglo(productos,codigo,nombre);
+            if(indiceBusquedaProducto!=-1) {
+                productos[indiceBusquedaProducto] = null;
+                contadorActualproductos--;
+                panelProductos.modeloTabla.removeRow(filaSeleccionada);
+                System.out.println("Producto eliminado con éxito");
+                correrValores(productos,indiceBusquedaProducto);
+            }else{
+                panelProductos.modeloTabla.removeRow(filaSeleccionada);
+                contadorActualproductos--;
+                System.out.println("Producto eliminado con éxito");
+            }
+        }else{
+            System.out.println("No hay nada seleccionado");
+        }
+    }
+
+    public void cargaMasivaProductos(){
+        String ruta = escogerArchivo();
+        String content = getContentOfFile(ruta);
+        JsonParser parser = new JsonParser();
+        JsonArray arreglo = parser.parse(content).getAsJsonArray();
+        int contador = 0;
+        do{
+            for(int i = 0; i < arreglo.size();i++){
+                contador+=1;
+                JsonObject objeto = arreglo.get(i).getAsJsonObject();
+                long codigo = objeto.get("codigo").getAsLong();
+                String nombre = objeto.get("nombre").getAsString();
+                String descripcion = objeto.get("descripcion").getAsString();
+                long cantidad = objeto.get("cantidad").getAsLong();
+                double precio = objeto.get("precio").getAsDouble();
+                if(!buscarCodigoProducto(productos,codigo)){
+                    if(contadorActualproductos < 200){
+                        Productos producto = new Productos(codigo,nombre,descripcion,cantidad,precio);
+                        productos[contadorActualproductos] = producto;
+                        contadorActualproductos++;
+                    }
+                }
+            }
+        }while(contador<200);
+
+        panelProductos.modeloTabla.setRowCount(0);
+        for(int i = 0; i < productos.length;i++){
+            if(productos[i] != null){
+                long codigo = productos[i].getCodigoProducto();
+                String nombre = productos[i].getNombreProducto();
+                String descripcion = productos[i].getDescripcionProducto();
+                long cantidad = productos[i].getCantidadProducto();
+                double precio = productos[i].getPrecioProducto();
+                String[] fila = {String.valueOf(codigo),nombre,descripcion,String.valueOf(cantidad),String.valueOf(precio)};
+                panelProductos.modeloTabla.addRow(fila);
+            }
+        }
+
+    }
+    public boolean buscarCodigoProducto(Productos[] productos, long codigo){
+        for(int i = 0; i < productos.length;i++){
+            if(productos[i] != null){
+                if(productos[i].getCodigoProducto() == codigo){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void crearReporteProductos(){
+        PlantillaProductos plantilla = new PlantillaProductos(new Date().toString(),"blue_logo.jpeg",this.productos);
+        plantilla.crearPlantilla();
+        try{
+            File path = new File("Reporte_Productos.pdf");
+            Desktop.getDesktop().open(path);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /******************************************************************************************************
      * FUNCIONES QUE SE APLICAN AL FINALIZAR LA SESIÓN                                                    *
      ******************************************************************************************************/
@@ -571,9 +956,48 @@ public class VentanaAdmin extends JFrame implements ActionListener {
     private void escribirDatos(Object object) {
         if(object.equals(sucursales)){
             serializarSucursal(sucursales);
+        }else if(object.equals(productos)){
+            serializarProductos(productos);
         }
     }
 
+
+    public Productos[] copiarProductos(){
+        Productos[] productosCopia = new Productos[contadorActualproductos];
+        for(int i = 0; i < contadorActualproductos; i++){
+            productosCopia[i] = productos[i];
+        }
+        return productosCopia;
+    }
+    public void ordenarProductos(){
+        Productos[] c = copiarProductos();
+        for(int i = 0; i < contadorActualproductos; i++){
+            for(int j = 0; j < contadorActualproductos; j++){
+                if(c[i].getCodigoProducto() < c[j].getCodigoProducto()){
+                    Productos aux = c[i];
+                    c[i] = c[j];
+                    c[j] = aux;
+                }
+            }
+        }
+
+        for(int i = 0; i < c.length ; i++){
+            productos[i] = c[i];
+        }
+
+    }
+    public void serializarProductos(Object object){
+        try{
+            FileOutputStream archivo = new FileOutputStream("productos.bin");
+            ObjectOutputStream serializar = new ObjectOutputStream(archivo);
+            serializar.writeObject(object);
+            serializar.close();
+        }catch (FileNotFoundException e){
+            System.out.println("Archivo no encontrado "  + e);
+        }catch (IOException e){
+            System.out.println("Error " + e);
+        }
+    }
 
 
 
