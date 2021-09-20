@@ -4,6 +4,8 @@ import Clases.Clientes;
 import Clases.Productos;
 import Clases.Sucursales;
 import Clases.Vendedores;
+import com.google.gson.*;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,8 +21,10 @@ public class VentanaAdmin extends JFrame implements ActionListener {
     public Vendedores[] vendedores = new Vendedores[400];
     public int contadorActualSucursal = 0, contadorActualproductos = 0, ContadorActualClientes = 0,
             ContadorActualVendedores = 0;
-        
-    //COMPONENTES VENTANA ADMIN
+
+    /******************************************************************************************************
+     * COMPONENTES DE LA VENTANA ADMINISTRADOR                                                            *
+     ******************************************************************************************************/
     JButton botonCerrarSesión;
     JTabbedPane grupoPaneles;
     PanelSucursales panelsucursal = new PanelSucursales();
@@ -28,7 +32,9 @@ public class VentanaAdmin extends JFrame implements ActionListener {
     PanelClientes panelClientes = new PanelClientes();
     PanelVendedores panelVendedores = new PanelVendedores();
 
-    //COMPONENTES JDIALOG CREAR NUEVA SUCURSAL
+    /******************************************************************************************************
+     * COMPONENTES DEL JDIALOG PARA CREAR NUEVA SUCURSAL Y ACTUALIZAR SUCURSAL                            *
+     ******************************************************************************************************/
     JDialog crearNuevaSucursal;
     JLabel encabezadoD,codigoD,NombreD,direccionD,correoD,telefonoD;
     JTextField cajaCodigoD,cajaNombreD,cajaDireccionD, cajaCorreoD, cajaTelefonoD;
@@ -62,8 +68,7 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         colocarTabbedPanel();
     }
 
-
-    private  Object leerDatosSucursal(){
+    public Object leerDatosSucursal(){
         try{
             FileInputStream lectura = new FileInputStream("sucursales.bin");
             ObjectInputStream leerdatos = new ObjectInputStream(lectura);
@@ -77,7 +82,6 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         }
         return null;
     }
-
     private void cargarDatosSucursal(){
         if(!(leerDatosSucursal() == null)){
             sucursales = ((Sucursales[]) leerDatosSucursal());
@@ -93,6 +97,7 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         }
     }
 
+
     private void colocarTabbedPanel() {
         grupoPaneles = new JTabbedPane();
         grupoPaneles.setBounds(15,77,745,587);
@@ -107,31 +112,17 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         panelsucursal.crearSurcursal.addActionListener(this);
         panelsucursal.actualizarSucursal.addActionListener(this);
         panelsucursal.eliminarSucursal.addActionListener(this);
+        panelsucursal.cargaMasivaSucursal.addActionListener(this);
+        panelsucursal.exportarSucursal.addActionListener(this);
+
         panelProductos.crearProducto.addActionListener(this);
         panelProductos.actualizarProducto.addActionListener(this);
+
         panelClientes.crearCliente.addActionListener(this);
         panelClientes.actualizarCliente.addActionListener(this);
+
         panelVendedores.crearVendedor.addActionListener(this);
         panelVendedores.actualizarVendedor.addActionListener(this);
-    }
-
-    private void escribirDatos(Object object) {
-        if(object.equals(sucursales)){
-            serializarSucursal(sucursales);
-        }
-    }
-
-    public void serializarSucursal(Object object){
-        try{
-            FileOutputStream archivo = new FileOutputStream("sucursales.bin");
-            ObjectOutputStream serializar = new ObjectOutputStream(archivo);
-            serializar.writeObject(object);
-            serializar.close();
-        }catch (FileNotFoundException e){
-            System.out.println("Archivo no encontrado "  + e);
-        }catch (IOException e){
-            System.out.println("Error " + e);
-        }
     }
 
     @Override
@@ -146,26 +137,28 @@ public class VentanaAdmin extends JFrame implements ActionListener {
             funcionbotonActualizarSucursal();
         }else if(e.getSource() == panelsucursal.eliminarSucursal){
             eliminarSucursal();
+        }else if(e.getSource() == panelsucursal.cargaMasivaSucursal){
+              cargaMasivaSucursal();
+        }else if(e.getSource() == panelsucursal.exportarSucursal){
+
         }
         else if(e.getSource() == panelProductos.crearProducto){
             panelProductos.ventanaCrearNuevoProducto();
-            System.out.println("Crear nuevo producto");
         }else if(e.getSource() == panelProductos.actualizarProducto){
             panelProductos.ventanaActualizarProducto();
-            System.out.println("Actualizar un producto");
-        }else if(e.getSource() == panelClientes.crearCliente){
+        }
+        else if(e.getSource() == panelClientes.crearCliente){
             panelClientes.ventanaCrearNuevoCliente();
-            System.out.println("Crear Nuevo Cliente");
         }else if(e.getSource() == panelClientes.actualizarCliente){
             panelClientes.ventanaActualizarCliente();
-            System.out.println("Actualizar Cliente");
-        }else if(e.getSource() == panelVendedores.crearVendedor){
+        }
+        else if(e.getSource() == panelVendedores.crearVendedor){
             panelVendedores.ventanaCrearNuevoVendedor();
-            System.out.println("Crear Vendedor");
         }else if(e.getSource() == panelVendedores.actualizarVendedor){
             panelVendedores.ventanaActualizarVendedor();
-            System.out.println("Actualizar un Vendedor");
-        }else if(e.getSource() == botonCerrarSesión){
+        }
+        else if(e.getSource() == botonCerrarSesión){
+            ordenarSucursal();
             escribirDatos(sucursales);
             JOptionPane.showMessageDialog(null,"Sesión Terminada", "Cerrar Sesión",JOptionPane.INFORMATION_MESSAGE);
             dispose();
@@ -175,7 +168,9 @@ public class VentanaAdmin extends JFrame implements ActionListener {
 
     }
 
-    //JDIALOG PARA CREAR NUEVA SUCURSAL, ACTUALIZAR, ELIMINAR
+    /******************************************************************************************************
+     * INVOCAR VENTANA PARA CREAR Y ACTUALIZAR NUEVA SUCURSAL Y FUNCIONES: ACTUALIZAR, ELIMINAR, CARGA MASIVA Y PDF            *
+     ******************************************************************************************************/
     public void ventanaCrearNuevaSucursal(){
         crearNuevaSucursal = new JDialog();
         crearNuevaSucursal.setLayout(null);
@@ -268,6 +263,7 @@ public class VentanaAdmin extends JFrame implements ActionListener {
             System.out.println("Ya no se pueden agregar más sucursales");
         }
     }
+
     public void ventanaActualizarSucursal(){
         crearNuevaSucursal = new JDialog();
         crearNuevaSucursal.setLayout(null);
@@ -357,30 +353,6 @@ public class VentanaAdmin extends JFrame implements ActionListener {
             System.out.println("No hay nada seleccionado");
         }
     }
-    public void eliminarSucursal(){
-        if(!panelsucursal.tablaSucursal.getSelectionModel().isSelectionEmpty()){
-            int filaSeleccionada = panelsucursal.tablaSucursal.getSelectedRow();
-            long codigo = Long.parseLong(((String)panelsucursal.modeloTabla.getValueAt(filaSeleccionada,0)).trim());
-            String nombre = ((String)panelsucursal.modeloTabla.getValueAt(filaSeleccionada,1)).trim();
-            int indiceBusquedaSucursal = buscarEnArreglo(sucursales,codigo,nombre);
-            if(indiceBusquedaSucursal!=-1) {
-                sucursales[indiceBusquedaSucursal] = null;
-                contadorActualSucursal--;
-                panelsucursal.modeloTabla.removeRow(filaSeleccionada);
-                System.out.println("Sucursal eliminada con éxito");
-                correrValores(sucursales,indiceBusquedaSucursal);
-                int indiceNulo = buscarElNulo(sucursales);
-                ordenarSucursal(sucursales,indiceNulo);
-            }else{
-                panelsucursal.modeloTabla.removeRow(filaSeleccionada);
-                contadorActualSucursal--;
-                System.out.println("Sucursal eliminada con éxito");
-            }
-        }else{
-            System.out.println("No hay nada seleccionado");
-        }
-    }
-
     public void funcionbotonActualizarSucursal(){
         int filaSeleccionada = panelsucursal.tablaSucursal.getSelectedRow();
         Long codigoBusqueda = Long.parseLong(((String)panelsucursal.modeloTabla.getValueAt(filaSeleccionada,0)).trim());
@@ -406,6 +378,27 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         crearNuevaSucursal.dispose();
     }
 
+    public void eliminarSucursal(){
+        if(!panelsucursal.tablaSucursal.getSelectionModel().isSelectionEmpty()){
+            int filaSeleccionada = panelsucursal.tablaSucursal.getSelectedRow();
+            long codigo = Long.parseLong(((String)panelsucursal.modeloTabla.getValueAt(filaSeleccionada,0)).trim());
+            String nombre = ((String)panelsucursal.modeloTabla.getValueAt(filaSeleccionada,1)).trim();
+            int indiceBusquedaSucursal = buscarEnArreglo(sucursales,codigo,nombre);
+            if(indiceBusquedaSucursal!=-1) {
+                sucursales[indiceBusquedaSucursal] = null;
+                contadorActualSucursal--;
+                panelsucursal.modeloTabla.removeRow(filaSeleccionada);
+                System.out.println("Sucursal eliminada con éxito");
+                correrValores(sucursales,indiceBusquedaSucursal);
+            }else{
+                panelsucursal.modeloTabla.removeRow(filaSeleccionada);
+                contadorActualSucursal--;
+                System.out.println("Sucursal eliminada con éxito");
+            }
+        }else{
+            System.out.println("No hay nada seleccionado");
+        }
+    }
     public int buscarEnArreglo(Object object,long codigo, String nombre){
         int indice;
         if(object.equals(sucursales)){
@@ -421,7 +414,6 @@ public class VentanaAdmin extends JFrame implements ActionListener {
         }
         return -1;
     }
-
     public void correrValores(Object[] object,int indiceInicio){
         for(int i = indiceInicio ; i < object.length; i++){
             int aux = i+1;
@@ -432,63 +424,156 @@ public class VentanaAdmin extends JFrame implements ActionListener {
                     object[i] = null;
                 }
             }
-            /*if(object[i] == null){
-                int aux = i+1;
-                if(aux < object.length){
-                    object[i] = object[aux];
-                }
-            }*/
         }
 
-        for(int i = 0; i < object.length; i++){
+       /* for(int i = 0; i < object.length; i++){
             if(object[i] != null){
                 System.out.println(object[i].toString());
             }
-        }
+        }*/
 
     }
 
-    public void ordenarSucursal(Object[] object, int indiceNulo){
-        if(object.equals(sucursales)){
-            int cuentaintercambios = 0;
-            for(boolean ordenado = false; !ordenado;){
-                for(int i=0; i < indiceNulo-1; i++){
-                        if(sucursales[i].getCodigoSucursal() > sucursales[i+1].getCodigoSucursal()){
-                            Sucursales sucursalAux = sucursales[i];
-                            sucursales[i] = sucursales[i+1];
-                            sucursales[i+1]=sucursalAux;
-                            cuentaintercambios++;
-                        if(cuentaintercambios==0){
-                            ordenado = true;
-                        }
-                        cuentaintercambios=0;
+    public void cargaMasivaSucursal(){
+        String ruta = escogerArchivo();
+        String content = getContentOfFile(ruta);
+        JsonParser parser = new JsonParser();
+        JsonArray arreglo = parser.parse(content).getAsJsonArray();
+        int contador = 0;
+        do{
+            for(int i = 0; i < arreglo.size();i++){
+                contador+=1;
+                JsonObject objeto = arreglo.get(i).getAsJsonObject();
+                long codigo = objeto.get("codigo").getAsLong();
+                String nombre = objeto.get("nombre").getAsString();
+                String direccion = objeto.get("direccion").getAsString();
+                String correo = objeto.get("coreo").getAsString();
+                long telefono = objeto.get("telefono").getAsLong();
+                if(!buscarCodigoSucursal(sucursales,codigo)){
+                    if(contadorActualSucursal < 50){
+                        Sucursales sucursal = new Sucursales(codigo,nombre,direccion,correo,telefono);
+                        sucursales[contadorActualSucursal] = sucursal;
+                        contadorActualSucursal++;
                     }
+                }
+            }
+        }while(contador<50);
 
+        panelsucursal.modeloTabla.setRowCount(0);
+        for(int i = 0; i < sucursales.length;i++){
+            if(sucursales[i] != null){
+                long codigo = sucursales[i].getCodigoSucursal();
+                String nombre = sucursales[i].getNombreSucursal();
+                String direccion = sucursales[i].getDireccionSucursal();
+                String correo = sucursales[i].getCorreoSucursal();
+                long telefono = sucursales[i].getTelefonoSucursal();
+                String[] fila = {String.valueOf(codigo),nombre,direccion,correo,String.valueOf(telefono)};
+                panelsucursal.modeloTabla.addRow(fila);
+            }
+        }
+
+    }
+    public String escogerArchivo(){
+        JFileChooser f = new JFileChooser();
+        f.showOpenDialog(this);
+        File archivo = f.getSelectedFile();
+        String ruta = archivo.getAbsolutePath();
+        return ruta;
+    }
+    public String getContentOfFile(String pathname) {
+        File archivo = null;
+        FileReader fr = null;
+        BufferedReader br = null;
+
+        try {
+            // Apertura del fichero y creacion de BufferedReader para poder
+            // hacer una lectura comoda (disponer del metodo readLine()).
+            archivo = new File(pathname);
+            fr = new FileReader(archivo);
+            br = new BufferedReader(fr);
+            // Lectura del fichero
+            String content = "";
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                content += linea + "\n";
+            }
+            return content;
+        }catch (FileNotFoundException fnfe) {
+            System.err.println("No se encontró el archivo. Inténtelo de nuevo");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (null != fr) {
+                    fr.close();
+                }
+            }catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        return "";
+    }
+    public boolean buscarCodigoSucursal(Sucursales[] sucursales, long codigo){
+        for(int i = 0; i < sucursales.length;i++){
+            if(sucursales[i] != null){
+                if(sucursales[i].getCodigoSucursal() == codigo){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /******************************************************************************************************
+     * FUNCIONES QUE SE APLICAN AL FINALIZAR LA SESIÓN                                                    *
+     ******************************************************************************************************/
+    public Sucursales[] copiarSucursal(){
+        Sucursales[] sucursalCopia = new Sucursales[contadorActualSucursal];
+        for(int i = 0; i < contadorActualSucursal ; i++){
+            sucursalCopia[i] = sucursales[i];
+        }
+        return sucursalCopia;
+    }
+    public void ordenarSucursal(){
+        Sucursales[] c = copiarSucursal();
+        for(int i = 0; i < contadorActualSucursal; i++){
+            for(int j = 0; j < contadorActualSucursal; j++){
+                if(c[i].getCodigoSucursal() < c[j].getCodigoSucursal()){
+                    Sucursales aux = c[i];
+                    c[i] = c[j];
+                    c[j] = aux;
                 }
             }
         }
 
-        for(int i = 0; i < object.length; i++){
-            if(object[i] != null){
-                System.out.println(object[i].toString());
-            }
+        for(int i = 0; i < c.length; i++){
+                System.out.println(c[i].toString());
+        }
+
+        for(int i = 0; i < c.length ; i++){
+            sucursales[i] = c[i];
+        }
+
+    }
+    public void serializarSucursal(Object object){
+        try{
+            FileOutputStream archivo = new FileOutputStream("sucursales.bin");
+            ObjectOutputStream serializar = new ObjectOutputStream(archivo);
+            serializar.writeObject(object);
+            serializar.close();
+        }catch (FileNotFoundException e){
+            System.out.println("Archivo no encontrado "  + e);
+        }catch (IOException e){
+            System.out.println("Error " + e);
+        }
+    }
+    private void escribirDatos(Object object) {
+        if(object.equals(sucursales)){
+            serializarSucursal(sucursales);
         }
     }
 
-    public int buscarElNulo(Object[] object){
-        int indiceNulo;
-      if(object.equals(sucursales)){
-          for(int i = 0; i < sucursales.length; i++){
-              if(sucursales[i] == null){
-                  indiceNulo = i;
-                  return indiceNulo;
-              }
-          }
-      }
-
-      indiceNulo = sucursales.length;
-      return indiceNulo;
-    }
 
 
 
