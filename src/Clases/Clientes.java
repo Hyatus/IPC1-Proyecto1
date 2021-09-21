@@ -5,11 +5,11 @@ import java.io.Serializable;
 public class Clientes implements Serializable {
     private long codigoCliente;
     private String nombreCliente;
-    private long nitCliente;
+    private String nitCliente;
     private String correoCliente;
     private char generoCliente;
 
-    public Clientes(long codigoCliente, String nombreCliente, long nitCliente, String correoCliente, char generoCliente) {
+    public Clientes(long codigoCliente, String nombreCliente, String nitCliente, String correoCliente, char generoCliente) {
         this.codigoCliente = codigoCliente;
         this.nombreCliente = nombreCliente;
         this.nitCliente = nitCliente;
@@ -33,11 +33,11 @@ public class Clientes implements Serializable {
         this.nombreCliente = nombreCliente;
     }
 
-    public long getNitCliente() {
+    public String getNitCliente() {
         return nitCliente;
     }
 
-    public void setNitCliente(long nitCliente) {
+    public void setNitCliente(String nitCliente) {
         this.nitCliente = nitCliente;
     }
 

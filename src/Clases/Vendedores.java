@@ -9,7 +9,7 @@ public class Vendedores implements Serializable {
     private Ventas[] ventas = new Ventas[1000];
     private char generoVendedor;
     private String passwordVendedor;
-    private int numeroVentas;
+    private long numeroVentas;
 
     public Vendedores(long codigoVendedor, String nombreVendedor, long cajaVendedor, Ventas[] ventas, char generoVendedor, String passwordVendedor) {
         this.codigoVendedor = codigoVendedor;
@@ -20,7 +20,7 @@ public class Vendedores implements Serializable {
         this.passwordVendedor = passwordVendedor;
     }
 
-    public Vendedores(long codigoVendedor, String nombreVendedor, long cajaVendedor, char generoVendedor, String passwordVendedor, int numeroVentas) {
+    public Vendedores(long codigoVendedor, String nombreVendedor, long cajaVendedor, long numeroVentas, char generoVendedor, String passwordVendedor) {
         this.codigoVendedor = codigoVendedor;
         this.nombreVendedor = nombreVendedor;
         this.cajaVendedor = cajaVendedor;
@@ -76,5 +76,13 @@ public class Vendedores implements Serializable {
 
     public void setPasswordVendedor(String passwordVendedor) {
         this.passwordVendedor = passwordVendedor;
+    }
+
+    public long getNumeroVentas() {
+        return numeroVentas;
+    }
+
+    public void setNumeroVentas(long numeroVentas) {
+        this.numeroVentas = numeroVentas;
     }
 }

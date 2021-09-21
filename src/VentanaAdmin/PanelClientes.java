@@ -1,6 +1,7 @@
 package VentanaAdmin;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -22,11 +23,7 @@ public class PanelClientes extends JPanel {
         }
     };
 
-    //Componentes para ventana emergente
-    public JDialog crearNuevoCliente;
-    public JLabel encabezadoClienteD,codigoClienteD,NombreClienteD,NitCliente,CorreoCliente,GeneroCliente;
-    public JTextField cajaCodigoClienteD,cajaNombreClienteD,cajaNitClienteD, cajaCorreoClienteD, cajaGeneroClienteD;
-    public JButton botonAgregarC;
+
 
     public PanelClientes(){
         this.setLayout(null);
@@ -38,7 +35,6 @@ public class PanelClientes extends JPanel {
     private void iniciarComponentes() {
         agregarPanel();
         agregarBotones();
-        agregarGrafica();
     }
 
     public void agregarPanel(){
@@ -55,6 +51,12 @@ public class PanelClientes extends JPanel {
         JScrollPane barra = new JScrollPane(tablaCliente,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         barra.setBounds(10,38,431,497);
         this.add(barra);
+        ListSelectionListener oyenteTabla = e -> {
+            if(e.getValueIsAdjusting()){
+               return;
+            }
+        };
+        tablaCliente.getSelectionModel().addListSelectionListener(oyenteTabla);
     }
 
     public void agregarBotones(){
@@ -85,172 +87,9 @@ public class PanelClientes extends JPanel {
 
     }
 
-    public void agregarGrafica(){
-        graficaCliente = new JLabel();
-        graficaCliente.setBounds(450,274,281,253);
-        graficaCliente.setOpaque(true);
-        graficaCliente.setBackground(Color.RED);
-        this.add(graficaCliente);
-    }
 
-    public void ventanaCrearNuevoCliente(){
-        crearNuevoCliente = new JDialog();
-        crearNuevoCliente.setLayout(null);
-        crearNuevoCliente.setResizable(false);
-        encabezadoClienteD = new JLabel("Crear Nuevo Cliente");
-        encabezadoClienteD.setBounds(164,47,190,30);
-        encabezadoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
 
-        codigoClienteD = new JLabel("Código");
-        codigoClienteD.setBounds(92,104,66,26);
-        codigoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
 
-        cajaCodigoClienteD = new JTextField();
-        cajaCodigoClienteD.setBounds(197,104,218,26);
-        cajaCodigoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
 
-        NombreClienteD = new JLabel("Nombre");
-        NombreClienteD.setBounds(92,156,75,26);
-        NombreClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaNombreClienteD = new JTextField();
-        cajaNombreClienteD.setBounds(197,156,218,26);
-        cajaNombreClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        NitCliente = new JLabel("NIT");
-        NitCliente.setBounds(88,209,95,26);
-        NitCliente.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaNitClienteD = new JTextField();
-        cajaNitClienteD.setBounds(197,209,218,26);
-        cajaNitClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        CorreoCliente = new JLabel("Correo");
-        CorreoCliente.setBounds(92,262,75,26);
-        CorreoCliente.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaCorreoClienteD = new JTextField();
-        cajaCorreoClienteD.setBounds(197,262,218,26);
-        cajaCorreoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        GeneroCliente = new JLabel("Género");
-        GeneroCliente.setBounds(92,315,75,26);
-        GeneroCliente.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaGeneroClienteD = new JTextField();
-        cajaGeneroClienteD.setBounds(197,315,218,26);
-        cajaGeneroClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        botonAgregarC = new JButton("Agregar");
-        botonAgregarC.setBounds(185,361,154,32);
-        botonAgregarC.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        ActionListener oyenteBoton = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Agregar Cliente");
-            }
-        };
-
-        botonAgregarC.addActionListener(oyenteBoton);
-
-        crearNuevoCliente.add(encabezadoClienteD);
-        crearNuevoCliente.add(codigoClienteD);
-        crearNuevoCliente.add(cajaCodigoClienteD);
-        crearNuevoCliente.add(NombreClienteD);
-        crearNuevoCliente.add(cajaNombreClienteD);
-        crearNuevoCliente.add(NitCliente);
-        crearNuevoCliente.add(cajaNitClienteD);
-        crearNuevoCliente.add(CorreoCliente);
-        crearNuevoCliente.add(cajaCorreoClienteD);
-        crearNuevoCliente.add(GeneroCliente);
-        crearNuevoCliente.add(cajaGeneroClienteD);
-        crearNuevoCliente.add(botonAgregarC);
-
-        crearNuevoCliente.setSize(510,479);
-        crearNuevoCliente.setLocationRelativeTo(null);
-        crearNuevoCliente.setVisible(true);
-
-    }
-
-    public void ventanaActualizarCliente(){
-        crearNuevoCliente = new JDialog();
-        crearNuevoCliente.setLayout(null);
-        crearNuevoCliente.setResizable(false);
-        encabezadoClienteD = new JLabel("Actualizar Cliente");
-        encabezadoClienteD.setBounds(164,47,190,30);
-        encabezadoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        codigoClienteD = new JLabel("Código");
-        codigoClienteD.setBounds(92,104,66,26);
-        codigoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaCodigoClienteD = new JTextField();
-        cajaCodigoClienteD.setBounds(197,104,218,26);
-        cajaCodigoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        NombreClienteD = new JLabel("Nombre");
-        NombreClienteD.setBounds(92,156,75,26);
-        NombreClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaNombreClienteD = new JTextField();
-        cajaNombreClienteD.setBounds(197,156,218,26);
-        cajaNombreClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        NitCliente = new JLabel("NIT");
-        NitCliente.setBounds(88,209,95,26);
-        NitCliente.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaNitClienteD = new JTextField();
-        cajaNitClienteD.setBounds(197,209,218,26);
-        cajaNitClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        CorreoCliente = new JLabel("Correo");
-        CorreoCliente.setBounds(92,262,75,26);
-        CorreoCliente.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaCorreoClienteD = new JTextField();
-        cajaCorreoClienteD.setBounds(197,262,218,26);
-        cajaCorreoClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        GeneroCliente = new JLabel("Género");
-        GeneroCliente.setBounds(92,315,75,26);
-        GeneroCliente.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        cajaGeneroClienteD = new JTextField();
-        cajaGeneroClienteD.setBounds(197,315,218,26);
-        cajaGeneroClienteD.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        botonAgregarC = new JButton("Actualizar");
-        botonAgregarC.setBounds(185,361,154,32);
-        botonAgregarC.setFont(new Font("Dialog",Font.PLAIN,18));
-
-        ActionListener oyenteBoton = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Actualizar");
-            }
-        };
-
-        botonAgregarC.addActionListener(oyenteBoton);
-
-        crearNuevoCliente.add(encabezadoClienteD);
-        crearNuevoCliente.add(codigoClienteD);
-        crearNuevoCliente.add(cajaCodigoClienteD);
-        crearNuevoCliente.add(NombreClienteD);
-        crearNuevoCliente.add(cajaNombreClienteD);
-        crearNuevoCliente.add(NitCliente);
-        crearNuevoCliente.add(cajaNitClienteD);
-        crearNuevoCliente.add(CorreoCliente);
-        crearNuevoCliente.add(cajaCorreoClienteD);
-        crearNuevoCliente.add(GeneroCliente);
-        crearNuevoCliente.add(cajaGeneroClienteD);
-        crearNuevoCliente.add(botonAgregarC);
-
-        crearNuevoCliente.setSize(510,479);
-        crearNuevoCliente.setLocationRelativeTo(null);
-        crearNuevoCliente.setVisible(true);
-
-    }
 
 }

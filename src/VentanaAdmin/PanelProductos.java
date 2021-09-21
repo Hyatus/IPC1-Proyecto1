@@ -4,13 +4,11 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 
 public class PanelProductos extends JPanel {
     //Componentes para el Panel
     public JButton crearProducto,cargaProducto,actualizarProducto,eliminarProducto,exportarProductos;
-    public JLabel graficaProducto;
     public JTable tablaProductos;
     public DefaultTableModel modeloTabla = new DefaultTableModel(){
         @Override
@@ -34,7 +32,6 @@ public class PanelProductos extends JPanel {
     private void iniciarComponentes() {
         agregarPanel();
         agregarBotones();
-        agregarGrafica();
     }
 
     public void agregarPanel(){
@@ -53,7 +50,7 @@ public class PanelProductos extends JPanel {
         this.add(barra);
         ListSelectionListener oyenteTabla = e -> {
             if(e.getValueIsAdjusting()){
-                System.out.println("Fila seleccionada");
+                return;
             }
         };
         tablaProductos.getSelectionModel().addListSelectionListener(oyenteTabla);
@@ -87,13 +84,9 @@ public class PanelProductos extends JPanel {
 
     }
 
-    public void agregarGrafica(){
-        graficaProducto = new JLabel();
-        graficaProducto.setBounds(450,274,281,253);
-        graficaProducto.setOpaque(true);
-        graficaProducto.setBackground(Color.BLUE);
-        this.add(graficaProducto);
-    }
+
+
+
 
 
 
