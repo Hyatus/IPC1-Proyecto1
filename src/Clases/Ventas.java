@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 public class Ventas implements Serializable {
     private int noFacturaVenta;
-    private long nitVenta;
+    private String nitVenta;
     private String nombreClienteVenta;
     private String fechaVenta;
     private double totalVenta;
+    public String[] detalle;
 
-    public Ventas(int noFacturaVenta, long nitVenta, String nombreClienteVenta, String fechaVenta, double totalVenta) {
+
+    public Ventas(int noFacturaVenta, String nitVenta, String nombreClienteVenta, String fechaVenta, double totalVenta) {
         this.noFacturaVenta = noFacturaVenta;
         this.nitVenta = nitVenta;
         this.nombreClienteVenta = nombreClienteVenta;
@@ -25,11 +27,11 @@ public class Ventas implements Serializable {
         this.noFacturaVenta = noFacturaVenta;
     }
 
-    public long getNitVenta() {
+    public String getNitVenta() {
         return nitVenta;
     }
 
-    public void setNitVenta(long nitVenta) {
+    public void setNitVenta(String nitVenta) {
         this.nitVenta = nitVenta;
     }
 

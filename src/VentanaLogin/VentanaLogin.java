@@ -1,11 +1,17 @@
 package VentanaLogin;
 
 import Clases.Vendedores;
+import VentanaAdmin.VentanaAdmin;
+import VentanaVendedor.VentanaVendedor;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public class VentanaLogin extends JFrame implements ActionListener {
 
@@ -18,6 +24,11 @@ public class VentanaLogin extends JFrame implements ActionListener {
     private Vendedores[] vendedoresLogin;
 
     public VentanaLogin(Vendedores[] vendedores){
+        try{
+            File archivoVendedores = new File("vendedores.bin");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
         this.setSize(424,333);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setTitle("Iniciar Sesión");
@@ -28,6 +39,7 @@ public class VentanaLogin extends JFrame implements ActionListener {
     }
 
     private void iniciarComponentes() {
+        cargarDatosVendedores();
         panelLogin = new JPanel();
         panelLogin.setLayout(null);
         this.getContentPane().add(panelLogin);
@@ -68,6 +80,26 @@ public class VentanaLogin extends JFrame implements ActionListener {
         panelLogin.add(botonIniciarSesion);
     }
 
+    public Object leerDatosVendedores(){
+        try{
+            FileInputStream lectura = new FileInputStream("vendedores.bin");
+            ObjectInputStream leerdatos = new ObjectInputStream(lectura);
+            Object data  = leerdatos.readObject();
+            leerdatos.close();
+            return data;
+        } catch (IOException e) {
+            System.out.println("error " + e);
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error " + e);
+        }
+        return null;
+    }
+    private void cargarDatosVendedores(){
+        if(!(leerDatosVendedores() == null)){
+            vendedoresLogin = ((Vendedores[]) leerDatosVendedores());
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         String contraseña;
@@ -75,44 +107,26 @@ public class VentanaLogin extends JFrame implements ActionListener {
             if(cajaUsuario.getText().equals(usuarioAdmin)){
                 contraseña = retornarPasswordUsuario();
                 if(passwordAdmin.equals(contraseña)){
-                    this.setVisible(false);
-                    cajaContrasenia.setText("");
-                    cajaUsuario.setText("");
+                    VentanaAdmin ventanaadmin = new VentanaAdmin();
+                    ventanaadmin.setVisible(true);
+                    dispose();
                 }else{
                     JOptionPane.showMessageDialog(null,"Contraseña incorrecta", "Error!",JOptionPane.ERROR_MESSAGE);
                 }
             }else{
-                String usuarioVendedor;
-                String passwordVendedor;
-                int indiceUsuario = busquedaUsuarioLogin(vendedoresLogin);
-                if(indiceUsuario != -1){
-                    usuarioVendedor = vendedoresLogin[indiceUsuario].getNombreVendedor();
-                    passwordVendedor = retornarPasswordUsuario();
-                    if(passwordVendedor.equals(vendedoresLogin[indiceUsuario].getPasswordVendedor())){
-                        System.out.println("Bienvenido " + usuarioVendedor);
-                        this.setVisible(false);
-                        cajaContrasenia.setText("");
-                        cajaUsuario.setText("");
-                    }else{
-                        JOptionPane.showMessageDialog(null,"Contraseña Incorrecta", "Error!",JOptionPane.ERROR_MESSAGE);
-                        System.out.println(cajaContrasenia.getPassword());
-                        System.out.println(cajaUsuario.getText());
-                    }
-                }else{
-                    JOptionPane.showMessageDialog(null,"Usuario incorrecto", "Error!",JOptionPane.ERROR_MESSAGE);
-                    System.out.println(cajaContrasenia.getPassword());
-                    System.out.println(cajaUsuario.getText());
-                }
+                verificarUsuario();
             }
         }
     }
 
-    public int busquedaUsuarioLogin(Vendedores[] vendedoresLogin){
-        for (int i = 0; i < vendedoresLogin.length; i++) {
-            if(vendedoresLogin[i].getNombreVendedor().equals(cajaUsuario.getText())){
-                return i;
+    public int busquedaCodigoLogin(Vendedores[] vendedores){
+            for (int i = 0; i < vendedores.length; i++) {
+                if(vendedores[i] != null){
+                    if(vendedores[i].getCodigoVendedor() == Long.parseLong(cajaUsuario.getText().trim())){
+                        return i;
+                    }
+                }
             }
-        }
         return -1;
     }
 
@@ -122,6 +136,30 @@ public class VentanaLogin extends JFrame implements ActionListener {
             contraseña += cajaContrasenia.getPassword()[i];
         }
         return contraseña;
+    }
+
+    public void verificarUsuario(){
+        long codigoVendedor;
+        String passwordVendedor;
+        int indiceUsuario = busquedaCodigoLogin(vendedoresLogin);
+        if(indiceUsuario != -1){
+            codigoVendedor = vendedoresLogin[indiceUsuario].getCodigoVendedor();
+            passwordVendedor = retornarPasswordUsuario();
+            if(passwordVendedor.equals(vendedoresLogin[indiceUsuario].getPasswordVendedor())){
+                System.out.println("Bienvenido " + vendedoresLogin[indiceUsuario].getNombreVendedor());
+                VentanaVendedor ventanavendedor = new VentanaVendedor(indiceUsuario);
+                ventanavendedor.setVisible(true);
+                dispose();
+            }else{
+                JOptionPane.showMessageDialog(null,"Contraseña Incorrecta", "Error!",JOptionPane.ERROR_MESSAGE);
+                System.out.println(cajaContrasenia.getPassword());
+                System.out.println(cajaUsuario.getText());
+            }
+        }else{
+            JOptionPane.showMessageDialog(null,"Usuario incorrecto", "Error!",JOptionPane.ERROR_MESSAGE);
+            System.out.println(cajaContrasenia.getPassword());
+            System.out.println(cajaUsuario.getText());
+        }
     }
 
 }

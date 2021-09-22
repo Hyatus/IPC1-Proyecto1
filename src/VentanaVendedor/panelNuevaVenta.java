@@ -12,7 +12,7 @@ public class panelNuevaVenta extends JPanel {
     public JTextField cajaNombreNV,cajaNITNV,cajaCorreoNV,cajaGeneroNV,cajaCodigoNV,cajaCantidad;
     public JComboBox comboCliente;
     public JTable tablaNuevaVenta;
-    private DefaultTableModel modeloTabla = new DefaultTableModel(){
+    public DefaultTableModel modeloTabla = new DefaultTableModel(){
         @Override
         public boolean isCellEditable(int row, int column) {
             if(column == 5){
@@ -126,10 +126,10 @@ public class panelNuevaVenta extends JPanel {
 
     public void agregarComboBoxClientes(){
         comboCliente = new JComboBox();
-        comboCliente.setBounds(280,184,210,26);
+        comboCliente.setBounds(280,184,210,30);
         this.add(comboCliente);
         JScrollPane barra= new JScrollPane(comboCliente,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        barra.setBounds(280,184,210,30);
+        barra.setBounds(270,184,220,40);
         this.add(barra);
     }
 
@@ -138,7 +138,6 @@ public class panelNuevaVenta extends JPanel {
         nuevoClienteNV.setBounds(500,184,130,30);
         nuevoClienteNV.setFont(new Font("Dialog",Font.PLAIN,14));
         this.add(nuevoClienteNV);
-
     }
 
     public void colocarSeccionAgregarProductos(){
@@ -149,14 +148,14 @@ public class panelNuevaVenta extends JPanel {
         AgregarProductosNV.setBorder(BorderFactory.createLineBorder(Color.BLACK,3,false));
         this.add(AgregarProductosNV);
 
-        FechaNV = new JLabel("Fecha: 22/09/2021");
+        FechaNV = new JLabel();
         FechaNV.setOpaque(true);
         FechaNV.setBounds(394,253,123,19);
         FechaNV.setBackground(Color.WHITE);
         FechaNV.setFont(new Font("Dialog",Font.BOLD,14));
         this.add(FechaNV);
 
-        NoNV = new JLabel("No. 000");
+        NoNV = new JLabel();
         NoNV.setOpaque(true);
         NoNV.setBounds(527,253,123,19);
         NoNV.setBackground(Color.WHITE);
@@ -208,7 +207,7 @@ public class panelNuevaVenta extends JPanel {
         TotalNV.setFont(new Font("Dialog",Font.PLAIN,16));
         this.add(TotalNV);
 
-        SubTotalNV = new JLabel("400.00");
+        SubTotalNV = new JLabel();
         SubTotalNV.setOpaque(true);
         SubTotalNV.setBackground(Color.WHITE);
         SubTotalNV.setBounds(541,445,70,22);

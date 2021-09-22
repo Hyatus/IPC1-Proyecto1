@@ -8,6 +8,7 @@ import PlantillaPDF.PlantillaClientes;
 import PlantillaPDF.PlantillaProductos;
 import PlantillaPDF.PlantillaSucursales;
 import PlantillaPDF.PlantillaVendedores;
+import VentanaLogin.VentanaLogin;
 import com.google.gson.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -220,8 +221,8 @@ public class VentanaAdmin extends JFrame implements ActionListener {
             escribirDatos(vendedores);
             JOptionPane.showMessageDialog(null,"Sesión Terminada", "Cerrar Sesión",JOptionPane.INFORMATION_MESSAGE);
             dispose();
-            //VentanaLogin ventanaLogin = new VentanaLogin(vendedores);
-            //ventanaLogin.setVisible(true);
+            VentanaLogin ventanaLogin = new VentanaLogin(vendedores);
+            ventanaLogin.setVisible(true);
         }
 
     }

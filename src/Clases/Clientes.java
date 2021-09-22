@@ -56,4 +56,9 @@ public class Clientes implements Serializable {
     public void setGeneroCliente(char generoCliente) {
         this.generoCliente = generoCliente;
     }
+
+    @Override
+    public String toString() {
+        return "Código : " + codigoCliente + " Nombre: " + nombreCliente;
+    }
 }
